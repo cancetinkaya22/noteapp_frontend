@@ -1,0 +1,25 @@
+child:StreamBuilder<List<PostModel>>(
+            stream: items != null ? Stream.value(items!) :Stream.value([]),
+            builder: (context, snapshot) {
+              if(snapshot.hasData){
+                List<PostModel> items = snapshot.data!;
+                if(items.isNotEmpty){
+                  return GridView(
+                    gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                    children:items.map((item) => noteCard(() { Navigator.push(context, MaterialPageRoute(builder: (context) =>  NoteReader(item: item,))); }, item)).toList(),
+
+                    );
+                }else{
+                  return const Text(
+                    "NOT EKLEYİN",
+                    style: TextStyle(color:Colors.white ,fontFamily: AutofillHints.addressCity),
+                  );
+                }  
+              } 
+              else if(snapshot.hasError){
+                return Text('Hata: ${snapshot.error}');
+              }else{
+                return const CircularProgressIndicator();
+              }
+           },)
+           

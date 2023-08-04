@@ -1,0 +1,23 @@
+import 'package:dio/dio.dart';
+
+class DatabaseHelper {
+  final Dio dio = Dio();
+  String url = "http://localhost/noteapi/api";
+
+  Future<List<Map<String, dynamic>>> getItems() async {
+    try {
+      final response = await dio.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = response.data;
+        return responseData.cast<Map<String, dynamic>>();
+      } else {
+        // Hata durumuyla ilgili işlemler yapabilirsiniz.
+        print("Veriler alınamadı. Hata kodu: ${response.statusCode}");
+      }
+    } catch (e) {
+      // Hata durumuyla ilgili işlemler yapabilirsiniz.
+      print("Hata oluştu: $e");
+    }
+    return []; // Boş bir liste döndürerek hata durumunda boş bir listeyle devam etmesini sağlayabilirsiniz.
+  }
+}

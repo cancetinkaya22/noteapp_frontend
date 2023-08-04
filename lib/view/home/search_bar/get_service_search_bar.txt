@@ -1,0 +1,29 @@
+import 'package:dio/dio.dart';
+import 'package:noteapp/view/home/search_bar/searchbar_model.dart';
+
+class FetchUserList {
+  List<NoteLists> results = [];
+
+  Future<List<NoteLists>> fetchPostItems({String? query}) async {
+    try {
+      final response = await Dio().get("http://localhost/noteapi/api");
+      
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = response.data;
+        List<Map<String, dynamic>> data = List<Map<String, dynamic>>.from(responseData);
+        
+        // results listesini doldurma
+        results = data.map((item) => NoteLists.fromJson(item)).toList();
+        if(query!=null){
+          results =results.where((element) => element.title!.toLowerCase().contains(query.toLowerCase())).toList();
+        }
+      } else {
+        print("Veriler alınamadı. Hata kodu: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Hata oluştu: $e");
+    }
+    
+    return results;
+  }
+}

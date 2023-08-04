@@ -1,0 +1,77 @@
+import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+
+import '../home/home/view_model/view_model.dart';
+
+Widget noteCard(BuildContext context, Function()? onTap, Map<String, dynamic> items) {
+  final title = items['title'] as String;
+  final content = items['content'] as String;
+  int noteId = int.parse(items['id']);
+
+  return InkWell(
+    onTap: () => onTap?.call(),
+    onLongPress: () async {
+      final dio = Dio();
+
+      Future<void> deleteNote() async {
+        try {
+          final response = await dio.delete('http://localhost/noteapi/api/?id=$noteId');
+          print('Response data: ${response.data}, Deleted ID: $noteId');
+        } catch (error) {
+          print('Hata oluştu: $error');
+        }
+      }
+
+      bool confirmResult = false;
+
+      confirmResult = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Silme Onayı"),
+            content: const Text("Bu notu silmek istediğinizden emin misiniz?"),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true); // Evet seçeneği
+                },
+                child: const Text("Evet"),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false); // Hayır seçeneği
+                },
+                child: const Text("Hayır"),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmResult) {
+        await deleteNote();
+
+        // ignore: use_build_context_synchronously
+        final homeViewModel = Provider.of<HomeViewModel>(context, listen: false);
+        homeViewModel.refreshHomeView();
+      }
+    },
+    child: Card(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.all(8.0),
+      child: ListTile(
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 28,
+          ),
+        ),
+        subtitle: Text(content),
+      ),
+    ),
+  );
+}
